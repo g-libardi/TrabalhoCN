@@ -14,15 +14,40 @@ def linear_least_squares(x: list, y: list):
     return f, a1, a2
 
 def draw_figure(x, y):
+    x = x.copy()
+    y = y.copy()
     f, a1, a2 = linear_least_squares(x, y)
     fig = plt.figure(figsize=(6, 4), dpi=100)
     ax = fig.add_subplot()
+
+    # Move left y-axis to centre, passing through (0,0)
+    ax.spines['left'].set_position('zero')
+
+    # Keep bottom x-axis at the bottom, making it always visible
+    # No need to change its position
+
+    # Eliminate upper and right axes
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+
+    # Show ticks in the left and lower axes only
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
     ax.scatter(x, y)
+    x.insert(0, 0)
     ax.plot(x, [f(i) for i in x], color="red")
-    
-    # Set x-ticks
+    ax.scatter(0, a1, color="green")
+    ax.set_xlabel('1/sqrt(M)')
+    ax.set_ylabel('1/Tk')
+
+    # Set y-limits
+    y_min, y_max = ax.get_ylim()
+    ax.set_ylim(y_min - 0.1 * (y_max - y_min), y_max + 0.1 * (y_max - y_min))
+
+    # Rest of the code
     x_ticks = plt.xticks()[0]
     new_ticks = x_ticks[::2]
     plt.xticks(new_ticks)
-    
+
     return fig

@@ -14,7 +14,7 @@ def draw_canvas(x, y):
     fig_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
 
 
-t_units = ['°C', '°F', '°K']
+t_units = ['°C', '°F', 'K']
 m_units = ['M·10⁵', 'ɸ']
 
 t_selector = [sg.Combo(t_units, key='-T-UNIT-', default_value='°C', enable_events=True, size=(5))]
@@ -31,15 +31,16 @@ layout = layout = [
         sg.Column([[sg.Canvas(key="-CANVAS-")]]),
     ],
     [
-        sg.Text("1/b = "), sg.Text(key="-RESULT-")
+        [sg.Text("Temperatura de Flory ="), sg.Text(key="-RESULT1-")],
+        [sg.Text("Equação da reta ="), sg.Text(key="-RESULT2-")]
     ]
 ]
 
-window = sg.Window("Trabalho CN", layout, margins=(10, 10), finalize=True, font=('Helvetica', 14))
+window = sg.Window("Determinação da temperatura de Flory para polímeros comerciais em solução", layout, margins=(10, 10), finalize=True, font=('Helvetica', 14))
 
 fig_canvas_agg = None
-draw_canvas([1, 2, 3, 4, 5], [1, 2, 3, 4, 5])
 
+window.write_event_value('OK', '')
 while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED:
@@ -47,31 +48,35 @@ while True:
     if event.startswith("-IN"):
         pass
     if event == "OK":
-        # Grab the values from the input fields
-        x = [float(values[f'-IN{i}-{0}-']) for i in range(5)] 
-        y = [float(values[f'-IN{i}-{1}-']) for i in range(5)]
-        
-        if 0.0 in x or 0.0 in y:
-            sg.popup("Invalid input, values must be non-zero", title="Error")
-            continue
-        
-        if values['-M-UNIT-'] == 'ɸ':
-            pass
-        elif values['-M-UNIT-'] == 'M·10⁵':
-            x = list(map(lambda x: 1/sqrt(x*(10**5)), x))
-        
-        if values['-T-UNIT-'] == '°C':
-            y = list(map(lambda x: x + 273, y))
-        elif values['-T-UNIT-'] == '°F':
-            y = list(map(lambda x: (x - 32) * 5/9 + 273, y))
-        
-        y = list(map(lambda x: 1/x, y))
-        
-        draw_canvas(x, y)
-        
-        #find the 1/b as b is the slope of the line
-        _, b, _ = lls(x, y)
-        window['-RESULT-'].update(f'{1/b:.4f}')
-
+        try:
+            # Grab the values from the input fields
+            x = [float(values[f'-IN{i}-{0}-']) for i in range(5)] 
+            y = [float(values[f'-IN{i}-{1}-']) for i in range(5)]
+            
+            if 0.0 in x or 0.0 in y:
+                sg.popup("Invalid input, values must be non-zero", title="Error")
+                continue
+            
+            if values['-M-UNIT-'] == 'ɸ':
+                pass
+            elif values['-M-UNIT-'] == 'M·10⁵':
+                x = list(map(lambda x: 1/sqrt(x*(10**5)), x))
+            
+            if values['-T-UNIT-'] == '°C':
+                y = list(map(lambda x: x + 273.15, y))
+            elif values['-T-UNIT-'] == '°F':
+                y = list(map(lambda x: (x - 32) * 5/9 + 273.15, y))
+            
+            y = list(map(lambda y: 1/y, y))
+            
+            draw_canvas(x, y)
+            
+            #find the 1/b as b is the slope of the line
+            _, b, a = lls(x, y)
+            window['-RESULT1-'].update(f'{1/b:.6f}K')
+            window['-RESULT2-'].update(f'{a:6f}x + {b:6f}')
+        except Exception as e:
+            sg.popup(f'Uncaught Error: {e}', title='Uncaught Error')
+            
 
 window.close()
