@@ -71,7 +71,7 @@ while True:
         
         #find the 1/b as b is the slope of the line
         _, b, _ = lls(x, y)
-        window['-RESULT-'].update(f'{b:.4f}')
+        window['-RESULT-'].update(f'{1/b:.4f}')
 
 
 window.close()
