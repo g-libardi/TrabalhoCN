@@ -13,7 +13,7 @@ def linear_least_squares(x: list, y: list):
         return a1 + a2 * x
     return f, a1, a2
 
-def draw_figure(x, y):
+def draw_figure(x, y, x_label="1/sqrt(M)", y_label="1/Tk"):
     x = x.copy()
     y = y.copy()
     f, a1, a2 = linear_least_squares(x, y)
@@ -38,8 +38,8 @@ def draw_figure(x, y):
     x.insert(0, 0)
     ax.plot(x, [f(i) for i in x], color="red")
     ax.scatter(0, a1, color="green")
-    ax.set_xlabel('1/sqrt(M)')
-    ax.set_ylabel('1/Tk')
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
 
     # Set y-limits
     y_min, y_max = ax.get_ylim()
